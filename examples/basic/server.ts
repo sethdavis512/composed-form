@@ -7,7 +7,8 @@ Bun.serve({
     development: {
         hmr: true,
         console: true
-    }
+    },
+    port: 3100
 });
 
-console.log('Example running at http://localhost:3000');
+console.log('Example running at http://localhost:3100');

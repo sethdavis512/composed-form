@@ -1,0 +1,45 @@
+{
+    "name": "composed-form",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "workspaces": [
+        "examples/*"
+    ],
+    "scripts": {
+        "build": "tsdown",
+        "dev": "tsdown --watch",
+        "test": "bun test",
+        "example": "bun run --cwd examples/basic dev"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/react": "^19",
+        "react": "^19",
+        "tsdown": "^0.10.0",
+        "typescript": "^5",
+        "zod": "^3"
+    },
+    "peerDependencies": {
+        "@hookform/resolvers": "^3",
+        "react": "^18 || ^19",
+        "react-hook-form": "^7",
+        "zod": "^3"
+    },
+    "dependencies": {
+        "@hookform/resolvers": "^3",
+        "react-hook-form": "^7"
+    }
+}

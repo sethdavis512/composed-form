@@ -1,0 +1,13 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "composed-form": ["../../src/index.ts"]
+        },
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "noEmit": true
+    },
+    "exclude": [],
+    "include": ["."]
+}

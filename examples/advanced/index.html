@@ -3,1009 +3,336 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Orbital — New Project</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
-        />
+        <title>composed-form — advanced example</title>
         <style>
-            /* ── Variables ────────────────────────────────────────── */
-            :root {
-                --bg: #07080c;
-                --surface: #0d1018;
-                --card: #12151f;
-                --card-hover: #161a26;
-                --border: #252d42;
-                --border-hover: #3a4660;
-                --text: #edf0f7;
-                --text-muted: #8a97b8;
-                --text-dim: #5a6888;
-                --accent: #f97316;
-                --accent-dim: rgba(249, 115, 22, 0.12);
-                --accent-hover: #fb923c;
-                --cyan: #22d3ee;
-                --cyan-dim: rgba(34, 211, 238, 0.1);
-                --success: #4ade80;
-                --success-dim: rgba(74, 222, 128, 0.12);
-                --error: #f87171;
-                --error-dim: rgba(248, 113, 113, 0.1);
-                --warn: #fbbf24;
-                --radius: 10px;
-                --radius-sm: 6px;
-                --shadow:
-                    0 0 0 1px var(--border), 0 8px 32px rgba(0, 0, 0, 0.5);
-                --font: 'DM Sans', system-ui, sans-serif;
-                --font-display: 'DM Serif Display', Georgia, serif;
-                --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-                --transition: 150ms ease;
-            }
-
-            /* ── Base ─────────────────────────────────────────────── */
             *,
             *::before,
             *::after {
                 box-sizing: border-box;
-                margin: 0;
-                padding: 0;
             }
-
-            html {
-                font-size: 15px;
-            }
-
             body {
-                background: var(--bg);
-                color: var(--text);
-                font-family: var(--font);
-                font-weight: 400;
-                line-height: 1.6;
-                min-height: 100vh;
-                padding: 2.5rem 1rem 4rem;
-                -webkit-font-smoothing: antialiased;
+                font-family: system-ui, sans-serif;
+                max-width: 480px;
+                margin: 4rem auto;
+                padding: 0 1.5rem;
+                color: #111;
             }
-
-            /* ── Wizard shell ─────────────────────────────────────── */
-            .wizard-wrap {
-                max-width: 660px;
-                margin: 0 auto;
+            h2 {
+                margin-top: 0;
             }
-
-            .wizard-brand {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-bottom: 2rem;
-                user-select: none;
+            label {
+                display: block;
+                margin-bottom: 1rem;
             }
-
-            .wizard-brand-mark {
-                width: 28px;
-                height: 28px;
-                border: 2px solid var(--accent);
-                border-radius: 50%;
-                position: relative;
-                flex-shrink: 0;
-            }
-
-            .wizard-brand-mark::after {
-                content: '';
-                position: absolute;
-                inset: 4px;
-                background: var(--accent);
-                border-radius: 50%;
-            }
-
-            .wizard-brand-name {
-                font-family: var(--font-display);
-                font-size: 1.25rem;
-                color: var(--text);
-                letter-spacing: -0.01em;
-            }
-
-            .wizard-brand-sep {
-                color: var(--text-dim);
-                margin: 0 0.25rem;
-            }
-
-            .wizard-brand-page {
+            label span {
+                display: block;
                 font-size: 0.875rem;
-                color: var(--text-muted);
+                font-weight: 600;
+                margin-bottom: 0.25rem;
             }
-
-            /* ── Progress rail ────────────────────────────────────── */
-            .progress-rail {
+            input,
+            select {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+            }
+            input:focus,
+            select:focus {
+                outline: 2px solid #2563eb;
+                outline-offset: 1px;
+                border-color: transparent;
+            }
+            textarea {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-family: inherit;
+                resize: vertical;
+                min-height: 4rem;
+            }
+            textarea:focus {
+                outline: 2px solid #2563eb;
+                outline-offset: 1px;
+                border-color: transparent;
+            }
+            .error {
+                color: #dc2626;
+                font-size: 0.8rem;
+                margin-top: 0.25rem;
+            }
+            .nav {
                 display: flex;
-                gap: 0;
-                margin-bottom: 2.5rem;
-                position: relative;
-            }
-
-            .progress-rail::before {
-                content: '';
-                position: absolute;
-                top: 14px;
-                left: 16px;
-                right: 16px;
-                height: 1px;
-                background: var(--border);
-            }
-
-            .progress-step {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 2rem;
+                justify-content: space-between;
                 align-items: center;
-                gap: 0.4rem;
-                z-index: 1;
-                cursor: default;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 1.25rem;
             }
-
-            .progress-step.clickable {
+            .progress {
+                font-size: 0.875rem;
+                color: #6b7280;
+            }
+            button {
+                padding: 0.5rem 1.25rem;
+                border: none;
+                border-radius: 0.375rem;
+                background: #2563eb;
+                color: white;
+                font-size: 0.9375rem;
                 cursor: pointer;
             }
-
-            .progress-step.clickable:hover .progress-dot {
-                border-color: var(--border-hover);
-                background: var(--card-hover);
+            button:hover {
+                background: #1d4ed8;
             }
-
-            .progress-dot {
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                border: 1.5px solid var(--border);
-                background: var(--surface);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.7rem;
-                font-weight: 600;
-                color: var(--text-muted);
-                transition:
-                    border-color var(--transition),
-                    background var(--transition),
-                    color var(--transition);
-                position: relative;
-            }
-
-            .progress-step.active .progress-dot {
-                border-color: var(--accent);
-                background: var(--accent-dim);
-                color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
-            }
-
-            .progress-step.completed .progress-dot {
-                border-color: var(--success);
-                background: var(--success-dim);
-                color: var(--success);
-            }
-
-            .progress-step.saved .progress-dot::after {
-                content: '✓';
-                position: absolute;
-                inset: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.75rem;
-            }
-
-            .progress-label {
-                font-size: 0.7rem;
-                font-weight: 500;
-                color: var(--text-muted);
-                text-align: center;
-                white-space: nowrap;
-                letter-spacing: 0.03em;
-                text-transform: uppercase;
-                transition: color var(--transition);
-            }
-
-            .progress-step.active .progress-label {
-                color: var(--accent);
-            }
-            .progress-step.completed .progress-label {
-                color: var(--text);
-            }
-
-            /* ── Step card ────────────────────────────────────────── */
-            .step-card {
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                overflow: hidden;
-                box-shadow: var(--shadow);
-            }
-
-            .step-header {
-                padding: 1.75rem 2rem 1.5rem;
-                border-bottom: 1px solid var(--border);
-                display: flex;
-                align-items: flex-start;
-                justify-content: space-between;
-            }
-
-            .step-header-left {
-                flex: 1;
-            }
-
-            .step-super {
-                font-size: 0.7rem;
-                font-weight: 600;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: var(--accent);
-                margin-bottom: 0.3rem;
-            }
-
-            .step-title {
-                font-family: var(--font-display);
-                font-size: 1.6rem;
-                color: var(--text);
-                line-height: 1.2;
-                letter-spacing: -0.02em;
-            }
-
-            .step-subtitle {
-                font-size: 0.875rem;
-                color: var(--text-muted);
-                margin-top: 0.3rem;
-            }
-
-            .step-position {
-                font-size: 0.75rem;
-                color: var(--text-dim);
-                font-family: var(--font-mono);
-                flex-shrink: 0;
-                padding-top: 0.2rem;
-            }
-
-            .step-body {
-                padding: 2rem;
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-
-            /* ── Form fields ──────────────────────────────────────── */
-            .field {
-                display: flex;
-                flex-direction: column;
-                gap: 0.4rem;
-            }
-
-            .field-label {
-                font-size: 0.75rem;
-                font-weight: 600;
-                letter-spacing: 0.05em;
-                text-transform: uppercase;
-                color: var(--text-muted);
-            }
-
-            .field-label .optional {
-                font-weight: 400;
-                color: var(--text-dim);
-                text-transform: none;
-                letter-spacing: 0;
-                margin-left: 0.3em;
-            }
-
-            .field-hint {
-                font-size: 0.8rem;
-                color: var(--text-muted);
-                margin-top: 0.1rem;
-            }
-
-            .field-error {
-                font-size: 0.78rem;
-                color: var(--error);
-                margin-top: 0.1rem;
-            }
-
-            .field-meta {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .char-count {
-                font-size: 0.7rem;
-                font-family: var(--font-mono);
-                color: var(--text-dim);
-                margin-left: auto;
-            }
-
-            .char-count.over {
-                color: var(--error);
-            }
-
-            .input {
-                width: 100%;
-                padding: 0.6rem 0.875rem;
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
-                color: var(--text);
-                font-family: var(--font);
-                font-size: 0.9375rem;
-                line-height: 1.5;
-                outline: none;
-                transition:
-                    border-color var(--transition),
-                    box-shadow var(--transition);
-            }
-
-            .input::placeholder {
-                color: var(--text-dim);
-            }
-
-            .input:focus {
-                border-color: var(--accent);
-                box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-            }
-
-            .input:disabled {
-                opacity: 0.5;
+            button:disabled {
+                opacity: 0.45;
                 cursor: not-allowed;
             }
-
-            .input.mono {
-                font-family: var(--font-mono);
-                font-size: 0.875rem;
+            button.secondary {
+                background: #e5e7eb;
+                color: #111;
             }
-
-            textarea.input {
-                resize: vertical;
-                min-height: 80px;
+            button.secondary:hover {
+                background: #d1d5db;
             }
-
-            .input-row {
-                display: flex;
-                align-items: stretch;
-                gap: 0;
-            }
-
-            .input-prefix {
-                padding: 0.6rem 0.75rem;
-                background: var(--border);
-                border: 1px solid var(--border);
-                border-right: none;
-                border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-                font-family: var(--font-mono);
+            pre {
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                padding: 1rem;
+                border-radius: 0.5rem;
                 font-size: 0.8125rem;
-                color: var(--text-muted);
-                white-space: nowrap;
+                overflow-x: auto;
+            }
+
+            /* ---- Step indicator ---- */
+            .step-indicator {
                 display: flex;
-                align-items: center;
-            }
-
-            .input-row .input {
-                border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-            }
-
-            .dirty-dot {
-                display: inline-block;
-                width: 5px;
-                height: 5px;
-                background: var(--warn);
-                border-radius: 50%;
-                margin-left: 0.3rem;
-                vertical-align: middle;
-            }
-
-            /* ── Type grid (Controller) ───────────────────────────── */
-            .type-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-            }
-
-            .type-btn {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.4rem;
-                padding: 0.75rem 0.5rem;
-                background: var(--card);
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius-sm);
-                color: var(--text-muted);
-                font-family: var(--font);
-                font-size: 0.8125rem;
-                cursor: pointer;
-                transition:
-                    border-color var(--transition),
-                    color var(--transition),
-                    background var(--transition);
-            }
-
-            .type-btn:hover {
-                border-color: var(--border-hover);
-                color: var(--text);
-                background: var(--card-hover);
-            }
-
-            .type-btn.selected {
-                border-color: var(--accent);
-                background: var(--accent-dim);
-                color: var(--accent);
-            }
-
-            .type-icon {
-                font-size: 1.3rem;
-                line-height: 1;
-            }
-
-            /* ── Team size (Controller) ───────────────────────────── */
-            .size-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-            }
-
-            .size-btn {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.25rem;
-                padding: 0.875rem 0.5rem;
-                background: var(--card);
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius-sm);
-                color: var(--text-muted);
-                font-family: var(--font);
-                font-size: 0.8125rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition:
-                    border-color var(--transition),
-                    color var(--transition),
-                    background var(--transition);
-            }
-
-            .size-btn:hover {
-                border-color: var(--border-hover);
-                color: var(--text);
-                background: var(--card-hover);
-            }
-
-            .size-btn.selected {
-                border-color: var(--cyan);
-                background: var(--cyan-dim);
-                color: var(--cyan);
-            }
-
-            .size-sub {
-                font-size: 0.7rem;
-                font-weight: 400;
-                color: var(--text-dim);
-                margin-top: 0.1rem;
-            }
-
-            /* ── Field array rows ─────────────────────────────────── */
-            .array-rows {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .array-row {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.6rem 0.75rem;
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
-                transition: border-color var(--transition);
-            }
-
-            .array-row:focus-within {
-                border-color: var(--border-hover);
-            }
-
-            .array-row .input {
-                background: transparent;
-                border: none;
-                padding: 0;
-                box-shadow: none;
-            }
-
-            .array-row .input:focus {
-                box-shadow: none;
-            }
-
-            .array-row-num {
-                font-family: var(--font-mono);
-                font-size: 0.7rem;
-                color: var(--text-dim);
-                width: 1.25rem;
-                flex-shrink: 0;
-                user-select: none;
-            }
-
-            .array-row-remove {
-                background: none;
-                border: none;
-                color: var(--text-dim);
-                font-size: 1rem;
-                cursor: pointer;
-                padding: 0.15rem 0.25rem;
-                border-radius: 4px;
-                line-height: 1;
-                flex-shrink: 0;
-                transition:
-                    color var(--transition),
-                    background var(--transition);
-            }
-
-            .array-row-remove:hover {
-                color: var(--error);
-                background: var(--error-dim);
-            }
-
-            .role-chips {
-                display: flex;
-                gap: 0.25rem;
-                flex-shrink: 0;
-            }
-
-            .role-chip {
-                padding: 0.2rem 0.55rem;
-                border: 1px solid var(--border);
-                border-radius: 999px;
-                font-size: 0.7rem;
-                font-weight: 600;
-                letter-spacing: 0.03em;
-                color: var(--text-muted);
-                cursor: pointer;
-                background: transparent;
-                transition:
-                    border-color var(--transition),
-                    color var(--transition),
-                    background var(--transition);
-                white-space: nowrap;
-            }
-
-            .role-chip:hover {
-                border-color: var(--border-hover);
-                color: var(--text);
-            }
-
-            .role-chip.primary.selected {
-                border-color: var(--accent);
-                color: var(--accent);
-                background: var(--accent-dim);
-            }
-            .role-chip.secondary.selected {
-                border-color: var(--cyan);
-                color: var(--cyan);
-                background: var(--cyan-dim);
-            }
-            .role-chip.tooling.selected {
-                border-color: var(--text-muted);
-                color: var(--text-muted);
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .priority-chips {
-                display: flex;
-                gap: 0.25rem;
-                flex-shrink: 0;
-            }
-
-            .priority-chip {
-                padding: 0.2rem 0.55rem;
-                border: 1px solid var(--border);
-                border-radius: 999px;
-                font-size: 0.7rem;
-                font-weight: 600;
-                color: var(--text-muted);
-                cursor: pointer;
-                background: transparent;
-                transition: all var(--transition);
-            }
-
-            .priority-chip.high.selected {
-                border-color: var(--error);
-                color: var(--error);
-                background: var(--error-dim);
-            }
-            .priority-chip.medium.selected {
-                border-color: var(--warn);
-                color: var(--warn);
-                background: rgba(251, 191, 36, 0.09);
-            }
-            .priority-chip.low.selected {
-                border-color: var(--success);
-                color: var(--success);
-                background: var(--success-dim);
-            }
-
-            .add-row-btn {
-                display: flex;
-                align-items: center;
-                gap: 0.4rem;
-                padding: 0.55rem 0.75rem;
-                background: transparent;
-                border: 1px dashed var(--border);
-                border-radius: var(--radius-sm);
-                color: var(--text-muted);
-                font-family: var(--font);
-                font-size: 0.8125rem;
-                cursor: pointer;
-                transition:
-                    border-color var(--transition),
-                    color var(--transition);
-                width: 100%;
-                justify-content: center;
-            }
-
-            .add-row-btn:hover {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
-
-            /* ── Toggle switch (useController) ───────────────────── */
-            .toggle-row {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 1rem;
-                padding: 0.75rem 0;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .toggle-row:last-of-type {
-                border-bottom: none;
-            }
-
-            .toggle-info {
-                flex: 1;
-            }
-
-            .toggle-label {
-                font-size: 0.9rem;
-                font-weight: 500;
-                color: var(--text);
-                line-height: 1.3;
-            }
-
-            .toggle-desc {
-                font-size: 0.8rem;
-                color: var(--text-muted);
-            }
-
-            .toggle-switch {
-                width: 36px;
-                height: 20px;
-                border-radius: 10px;
-                background: var(--border);
-                border: none;
-                cursor: pointer;
                 position: relative;
-                transition: background var(--transition);
-                flex-shrink: 0;
-                padding: 0;
+                margin-bottom: 2rem;
             }
-
-            .toggle-switch::after {
+            .step-indicator::before {
                 content: '';
                 position: absolute;
-                top: 3px;
-                left: 3px;
-                width: 14px;
-                height: 14px;
+                top: 7px;
+                left: 8px;
+                right: 8px;
+                height: 2px;
+                background: #e5e7eb;
+                z-index: 0;
+            }
+            .step-dot {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.3rem;
+                z-index: 1;
+                position: relative;
+            }
+            .step-dot .dot {
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
-                background: var(--text-muted);
+                background: #e5e7eb;
+                border: 2px solid #e5e7eb;
                 transition:
-                    transform var(--transition),
-                    background var(--transition);
+                    background 0.2s,
+                    border-color 0.2s;
+            }
+            .step-dot.past .dot {
+                background: #2563eb;
+                border-color: #2563eb;
+            }
+            .step-dot.current .dot {
+                background: white;
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            }
+            .step-dot span {
+                font-size: 0.6875rem;
+                color: #9ca3af;
+                text-align: center;
+                transition: color 0.2s;
+            }
+            .step-dot.past span,
+            .step-dot.current span {
+                color: #2563eb;
+                font-weight: 600;
+            }
+            .step-dot .dirty-dot {
+                width: 6px;
+                height: 6px;
+                background: #f59e0b;
+                border-radius: 50%;
+                position: absolute;
+                top: -2px;
+                right: calc(50% - 12px);
             }
 
-            .toggle-switch.on {
-                background: var(--accent-dim);
-                border: 1px solid var(--accent);
-            }
-
-            .toggle-switch.on::after {
-                transform: translateX(16px);
-                background: var(--accent);
-            }
-
-            /* ── Channel selector (Controller) ───────────────────── */
-            .channel-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
-            }
-
-            .channel-btn {
-                display: flex;
-                align-items: center;
-                gap: 0.6rem;
-                padding: 0.75rem 0.875rem;
-                background: var(--card);
-                border: 1.5px solid var(--border);
-                border-radius: var(--radius-sm);
-                color: var(--text-muted);
-                font-family: var(--font);
+            /* ---- Review summary ---- */
+            .review-hint {
                 font-size: 0.875rem;
-                cursor: pointer;
-                transition: all var(--transition);
-                text-align: left;
+                color: #6b7280;
+                margin-top: -0.5rem;
+                margin-bottom: 1.25rem;
             }
-
-            .channel-btn:hover {
-                border-color: var(--border-hover);
-                color: var(--text);
-            }
-
-            .channel-btn.selected {
-                border-color: var(--accent);
-                background: var(--accent-dim);
-                color: var(--accent);
-            }
-
-            .channel-icon {
-                font-size: 1.1rem;
-            }
-
-            /* ── Review ───────────────────────────────────────────── */
             .review-section {
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
                 overflow: hidden;
+                margin-bottom: 0.75rem;
             }
-
-            .review-section-header {
+            .review-header {
                 display: flex;
-                align-items: center;
                 justify-content: space-between;
-                padding: 0.6rem 0.875rem;
-                border-bottom: 1px solid var(--border);
-                background: rgba(255, 255, 255, 0.01);
+                align-items: center;
+                padding: 0.5rem 0.75rem;
+                background: #f9fafb;
+                border-bottom: 1px solid #e5e7eb;
+                font-size: 0.875rem;
             }
-
-            .review-section-title {
-                font-size: 0.7rem;
-                font-weight: 700;
-                letter-spacing: 0.07em;
-                text-transform: uppercase;
-                color: var(--text-muted);
-            }
-
-            .review-edit-btn {
-                background: none;
-                border: 1px solid var(--border);
-                border-radius: 4px;
-                padding: 0.1rem 0.5rem;
-                font-size: 0.72rem;
-                color: var(--text-muted);
-                cursor: pointer;
-                font-family: var(--font);
-                transition:
-                    border-color var(--transition),
-                    color var(--transition);
-            }
-
-            .review-edit-btn:hover {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
-
             .review-row {
                 display: flex;
-                align-items: flex-start;
                 justify-content: space-between;
-                padding: 0.55rem 0.875rem;
-                font-size: 0.875rem;
-                gap: 1rem;
-                border-bottom: 1px solid var(--border);
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+                border-bottom: 1px solid #f3f4f6;
             }
-
             .review-row:last-child {
                 border-bottom: none;
             }
-
-            .review-key {
-                color: var(--text-muted);
-                flex-shrink: 0;
+            .review-row span:first-child {
+                color: #6b7280;
             }
-
-            .review-val {
-                color: var(--text);
-                text-align: right;
-                word-break: break-all;
-                font-family: var(--font-mono);
+            button.link {
+                background: none;
+                color: #2563eb;
+                padding: 0;
                 font-size: 0.8125rem;
+                text-decoration: underline;
+            }
+            button.link:hover {
+                color: #1d4ed8;
+                background: none;
             }
 
-            .review-tag-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.25rem;
-                justify-content: flex-end;
-            }
-
-            .review-tag {
-                background: var(--card-hover);
-                border: 1px solid var(--border);
-                border-radius: 999px;
-                padding: 0.1rem 0.5rem;
-                font-size: 0.7rem;
-                color: var(--text-muted);
-            }
-
-            /* ── Navigation footer ────────────────────────────────── */
-            .wizard-nav {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 1.25rem 2rem;
-                border-top: 1px solid var(--border);
-                background: rgba(7, 8, 12, 0.5);
-                gap: 0.75rem;
-            }
-
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.4rem;
-                padding: 0.6rem 1.25rem;
-                border: none;
-                border-radius: var(--radius-sm);
-                font-family: var(--font);
-                font-size: 0.9rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition:
-                    background var(--transition),
-                    opacity var(--transition),
-                    transform var(--transition);
-            }
-
-            .btn:active {
-                transform: scale(0.98);
-            }
-            .btn:disabled {
-                opacity: 0.35;
-                cursor: not-allowed;
-                pointer-events: none;
-            }
-
-            .btn-primary {
-                background: var(--accent);
-                color: #fff;
-            }
-
-            .btn-primary:hover {
-                background: var(--accent-hover);
-            }
-
-            .btn-secondary {
-                background: var(--card);
-                border: 1px solid var(--border);
-                color: var(--text-muted);
-            }
-
-            .btn-secondary:hover {
-                border-color: var(--border-hover);
-                color: var(--text);
-            }
-
-            /* ── Saved toast ──────────────────────────────────────── */
-            .save-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.35rem;
-                font-size: 0.75rem;
-                color: var(--success);
-                background: var(--success-dim);
-                border: 1px solid rgba(34, 197, 94, 0.2);
-                border-radius: 999px;
-                padding: 0.2rem 0.6rem;
-                animation: fade-in 0.3s ease;
-            }
-
-            @keyframes fade-in {
-                from {
-                    opacity: 0;
-                    transform: translateY(4px);
-                }
-                to {
-                    opacity: 1;
-                    transform: none;
-                }
-            }
-
-            /* ── Success screen ───────────────────────────────────── */
-            .success-wrap {
-                text-align: center;
-                padding: 3rem 2rem;
-            }
-
-            .success-icon {
-                font-size: 3rem;
+            /* ---- Radio card group ---- */
+            .radio-group {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 0.5rem;
                 margin-bottom: 1rem;
-                animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .radio-card {
+                padding: 0.625rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.375rem;
+                text-align: center;
+                cursor: pointer;
+                font-size: 0.875rem;
+                background: white;
+            }
+            .radio-card:hover {
+                border-color: #9ca3af;
+            }
+            .radio-card.selected {
+                border-color: #2563eb;
+                background: #eff6ff;
             }
 
-            @keyframes pop {
-                from {
-                    transform: scale(0.5);
-                    opacity: 0;
-                }
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-            }
-
-            .success-title {
-                font-family: var(--font-display);
-                font-size: 2rem;
-                color: var(--text);
-                letter-spacing: -0.03em;
+            /* ---- Toggle switch ---- */
+            .toggle-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
                 margin-bottom: 0.5rem;
             }
-
-            .success-sub {
-                color: var(--text-muted);
-                font-size: 0.9rem;
-                margin-bottom: 2rem;
+            .toggle-label {
+                font-size: 0.875rem;
+                font-weight: 600;
+            }
+            .toggle {
+                position: relative;
+                width: 40px;
+                height: 22px;
+                background: #d1d5db;
+                border-radius: 11px;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                transition: background 0.2s;
+            }
+            .toggle.on {
+                background: #2563eb;
+            }
+            .toggle::after {
+                content: '';
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 18px;
+                height: 18px;
+                background: white;
+                border-radius: 50%;
+                transition: transform 0.2s;
+            }
+            .toggle.on::after {
+                transform: translateX(18px);
             }
 
-            .success-payload {
-                background: var(--card);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
-                padding: 1.25rem;
-                font-family: var(--font-mono);
+            /* ---- Array field rows ---- */
+            .field-row {
+                display: flex;
+                gap: 0.5rem;
+                align-items: flex-start;
+                margin-bottom: 0.5rem;
+            }
+            .field-row input,
+            .field-row select {
+                flex: 1;
+            }
+            button.remove {
+                background: #fee2e2;
+                color: #dc2626;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+            button.remove:hover {
+                background: #fecaca;
+            }
+            button.add {
+                background: #f0fdf4;
+                color: #16a34a;
+                font-size: 0.8rem;
+                margin-bottom: 1rem;
+            }
+            button.add:hover {
+                background: #dcfce7;
+            }
+
+            /* ---- Character count ---- */
+            .char-count {
                 font-size: 0.75rem;
-                color: var(--text-muted);
-                text-align: left;
-                overflow-x: auto;
-                white-space: pre-wrap;
-                margin-bottom: 1.5rem;
+                color: #9ca3af;
+                text-align: right;
+                margin-top: 0.125rem;
+            }
+            .char-count.over {
+                color: #dc2626;
             }
 
-            /* ── Separator ────────────────────────────────────────── */
-            .divider {
-                height: 1px;
-                background: var(--border);
-            }
-
-            /* ── Step animation ───────────────────────────────────── */
-            @keyframes step-enter {
-                from {
-                    opacity: 0;
-                    transform: translateY(6px);
-                }
-                to {
-                    opacity: 1;
-                    transform: none;
-                }
-            }
-
-            .step-body > * {
-                animation: step-enter 0.25s ease both;
-            }
-            .step-body > *:nth-child(2) {
-                animation-delay: 0.04s;
-            }
-            .step-body > *:nth-child(3) {
-                animation-delay: 0.08s;
-            }
-            .step-body > *:nth-child(4) {
-                animation-delay: 0.12s;
-            }
-            .step-body > *:nth-child(5) {
-                animation-delay: 0.16s;
+            /* ---- Field hint ---- */
+            .hint {
+                font-size: 0.75rem;
+                color: #6b7280;
+                margin-top: 0.125rem;
             }
         </style>
     </head>

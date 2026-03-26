@@ -1,0 +1,47 @@
+name: Deploy Examples to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install
+
+      # Build the library first (examples import from src via tsconfig paths,
+      # but the static bundler needs the source available).
+      - run: bun run build
+
+      # Bundle each example into a static site.
+      - run: bun build ./examples/basic/index.html --outdir=docs/basic
+      - run: bun build ./examples/advanced/index.html --outdir=docs/advanced
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

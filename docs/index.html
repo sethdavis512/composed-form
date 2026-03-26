@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>composed-form examples</title>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: system-ui, sans-serif;
+                max-width: 480px;
+                margin: 4rem auto;
+                padding: 0 1.5rem;
+                color: #111;
+            }
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+            .subtitle {
+                color: #6b7280;
+                font-size: 0.9375rem;
+                margin-bottom: 2rem;
+            }
+            a {
+                display: block;
+                padding: 1rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.5rem;
+                margin-bottom: 0.75rem;
+                text-decoration: none;
+                color: #111;
+                transition: border-color 0.15s;
+            }
+            a:hover {
+                border-color: #2563eb;
+            }
+            a strong {
+                display: block;
+                color: #2563eb;
+                margin-bottom: 0.25rem;
+            }
+            a span {
+                font-size: 0.875rem;
+                color: #6b7280;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>composed-form</h1>
+        <p class="subtitle">
+            Composable multi-step forms for React, built on react-hook-form and
+            Zod.
+        </p>
+        <a href="./basic/">
+            <strong>Basic Example</strong>
+            <span>
+                User registration with conditional billing step. Shows the core
+                ComposedForm + Step pattern.
+            </span>
+        </a>
+        <a href="./advanced/">
+            <strong>Advanced Example</strong>
+            <span>
+                Event planning wizard with 3 conditional steps, dynamic arrays,
+                custom inputs, and cross-field validation. Exercises every
+                library export.
+            </span>
+        </a>
+    </body>
+</html>

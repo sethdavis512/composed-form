@@ -1125,6 +1125,156 @@ function ConditionalStepWatcher({
 }
 
 // ---------------------------------------------------------------------------
+// Guide Sidebar -- shows conditional steps, active features, and tips
+// ---------------------------------------------------------------------------
+
+const STEP_TIPS: Record<string, string> = {
+    basics:
+        'Your choices here shape the wizard. Try changing Event type or Format and watch the step indicator update.',
+    schedule:
+        'Add schedule items to see useFieldArray in action. Total duration is computed reactively via useWatch.',
+    speakers:
+        'This step only appears for Conference or Workshop events. Change the event type on step 1 to hide it.',
+    venue:
+        'This step only appears for In-Person or Hybrid formats. Switch to Virtual on step 1 to hide it.',
+    ticketing:
+        'This step only appears when Pricing is set to Paid. Switch to Free on step 1 to hide it.',
+    notifications:
+        'Toggle switches use useController for custom boolean inputs. The channel selector uses Controller.',
+    review:
+        'All form values are read reactively with useWatch. Click Edit links to jump to any step with goToStep().'
+};
+
+function GuideSidebar({
+    eventType,
+    format,
+    pricing
+}: {
+    eventType: string;
+    format: string;
+    pricing: string;
+}) {
+    const { currentStepName } = useStep();
+
+    const showSpeakers =
+        eventType === 'conference' || eventType === 'workshop';
+    const showVenue = format === 'in-person' || format === 'hybrid';
+    const showTicketing = pricing === 'paid';
+
+    const conditionalSteps = [
+        {
+            name: 'Speakers',
+            active: showSpeakers,
+            trigger: 'Event type = Conference or Workshop',
+            current: eventType
+                ? `Type: ${eventType}`
+                : 'Not yet selected'
+        },
+        {
+            name: 'Venue',
+            active: showVenue,
+            trigger: 'Format = In-Person or Hybrid',
+            current: format
+                ? `Format: ${format}`
+                : 'Not yet selected'
+        },
+        {
+            name: 'Ticketing',
+            active: showTicketing,
+            trigger: 'Pricing = Paid',
+            current: pricing
+                ? `Pricing: ${pricing}`
+                : 'Not yet selected'
+        }
+    ];
+
+    const features = [
+        {
+            label: 'Auto-derived slug from event name',
+            highlight: currentStepName === 'basics'
+        },
+        {
+            label: 'Character counters via useFormContext',
+            highlight: currentStepName === 'basics'
+        },
+        {
+            label: 'Dynamic field arrays (schedule, speakers, sponsors)',
+            highlight:
+                currentStepName === 'schedule' ||
+                currentStepName === 'speakers' ||
+                currentStepName === 'ticketing'
+        },
+        {
+            label: 'Reactive total duration via useWatch',
+            highlight: currentStepName === 'schedule'
+        },
+        {
+            label: 'Custom toggle switches via useController',
+            highlight: currentStepName === 'notifications'
+        },
+        {
+            label: 'Cross-field validation (dates, pricing)',
+            highlight:
+                currentStepName === 'schedule' ||
+                currentStepName === 'ticketing'
+        },
+        {
+            label: 'Step-level onSubmitStep callbacks',
+            highlight: true
+        },
+        {
+            label: 'Dirty field indicators on step dots',
+            highlight: true
+        }
+    ];
+
+    return (
+        <aside className="guide">
+            <h3>Conditional Steps</h3>
+            <div className="guide-section">
+                {conditionalSteps.map((step) => (
+                    <div
+                        key={step.name}
+                        className={`guide-card ${step.active ? 'active' : 'inactive'}`}
+                    >
+                        <div className="guide-card-title">
+                            {step.name}{' '}
+                            <span
+                                className={`guide-tag ${step.active ? 'on' : 'off'}`}
+                            >
+                                {step.active ? 'visible' : 'hidden'}
+                            </span>
+                        </div>
+                        <div className="guide-card-desc">
+                            {step.trigger}
+                            <br />
+                            {step.current}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <h3>Active Features</h3>
+            <ul className="guide-feature-list">
+                {features.map((f) => (
+                    <li
+                        key={f.label}
+                        className={f.highlight ? 'highlight' : ''}
+                    >
+                        {f.label}
+                    </li>
+                ))}
+            </ul>
+
+            <h3>Try This</h3>
+            <div className="guide-tip">
+                {STEP_TIPS[currentStepName] ?? 'Navigate through the wizard to see different features.'}
+            </div>
+        </aside>
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Root App
 // ---------------------------------------------------------------------------
 
@@ -1178,37 +1328,47 @@ function App() {
                 onFormatChange={handleFormatChange}
                 onPricingChange={handlePricingChange}
             />
-            <StepIndicator />
+            <div className="app-layout">
+                <div>
+                    <StepIndicator />
 
-            <Step name="basics">
-                <BasicsStep />
-            </Step>
+                    <Step name="basics">
+                        <BasicsStep />
+                    </Step>
 
-            <Step name="schedule">
-                <ScheduleStep />
-            </Step>
+                    <Step name="schedule">
+                        <ScheduleStep />
+                    </Step>
 
-            <Step name="speakers" enabled={showSpeakers}>
-                <SpeakersStep />
-            </Step>
+                    <Step name="speakers" enabled={showSpeakers}>
+                        <SpeakersStep />
+                    </Step>
 
-            <Step name="venue" enabled={showVenue}>
-                <VenueStep />
-            </Step>
+                    <Step name="venue" enabled={showVenue}>
+                        <VenueStep />
+                    </Step>
 
-            <Step name="ticketing" enabled={showTicketing}>
-                <TicketingStep />
-            </Step>
+                    <Step name="ticketing" enabled={showTicketing}>
+                        <TicketingStep />
+                    </Step>
 
-            <Step name="notifications">
-                <NotificationsStep />
-            </Step>
+                    <Step name="notifications">
+                        <NotificationsStep />
+                    </Step>
 
-            <Step name="review">
-                <ReviewStep />
-            </Step>
+                    <Step name="review">
+                        <ReviewStep />
+                    </Step>
 
-            <NavBar />
+                    <NavBar />
+                </div>
+
+                <GuideSidebar
+                    eventType={eventType}
+                    format={format}
+                    pricing={pricing}
+                />
+            </div>
         </ComposedForm>
     );
 }

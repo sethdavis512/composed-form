@@ -6,7 +6,7 @@ import React, {
     useState
 } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { FieldValues } from 'react-hook-form';
+import type { DefaultValues, FieldPath, FieldValues, Resolver } from 'react-hook-form';
 import type { ZodSchema, z } from 'zod';
 import { ComposedFormContext } from './context/ComposedFormContext.ts';
 import { createZodResolver } from './utils/resolver.ts';
@@ -35,12 +35,16 @@ export function ComposedForm<
     onSubmitStep,
     children
 }: ComposedFormProps<TSchema, TValues>) {
+    // RHF's UseFormProps types (DefaultValues, Resolver) don't align 1:1 with
+    // the generic constraints we expose. The casts below are safe because
+    // createZodResolver returns a compatible Resolver<TValues> and defaultValues
+    // is Partial<TValues> which satisfies DeepPartial<TValues> at runtime.
     const form = useForm<TValues>({
         shouldUnregister: false,
         resolver: schema
-            ? (createZodResolver(schema as ZodSchema<TValues>) as never)
+            ? (createZodResolver(schema as ZodSchema<TValues>) as Resolver<TValues>)
             : resolver,
-        defaultValues: defaultValues as never
+        defaultValues: defaultValues as DefaultValues<TValues>
     });
 
     // `steps` is an ordered array that mirrors the render order of <Step> children.
@@ -65,13 +69,8 @@ export function ComposedForm<
             if (existing === -1) {
                 stepsRef.current = [...stepsRef.current, reg];
             } else {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.warn(
-                        `[composed-form] Duplicate <Step name="${reg.name}"> detected. Step names must be unique.`
-                    );
-                }
-                stepsRef.current = stepsRef.current.map((s, i) =>
-                    i === existing ? reg : s
+                throw new Error(
+                    `[composed-form] Duplicate <Step name="${reg.name}"> detected. Each step must have a unique name.`
                 );
             }
             bump();
@@ -124,7 +123,7 @@ export function ComposedForm<
         const fieldNames = Array.from(current.fieldRegistry.current);
         const valid =
             fieldNames.length > 0
-                ? await form.trigger(fieldNames as never[])
+                ? await form.trigger(fieldNames as FieldPath<TValues>[])
                 : true;
 
         if (!valid) return false;
@@ -168,7 +167,7 @@ export function ComposedForm<
         const fieldNames = Array.from(current.fieldRegistry.current);
         const valid =
             fieldNames.length > 0
-                ? await form.trigger(fieldNames as never[])
+                ? await form.trigger(fieldNames as FieldPath<TValues>[])
                 : true;
 
         if (!valid) return false;
@@ -235,7 +234,7 @@ export function ComposedForm<
             _registerStep,
             _unregisterStep,
             _updateStepEnabled,
-            form: form as unknown as ComposedFormContextValue<TValues>['form']
+            form
         }),
         [
             steps,

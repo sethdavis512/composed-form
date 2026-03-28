@@ -1,7 +1,25 @@
 {
     "name": "composed-form",
     "version": "0.1.0",
+    "description": "A React library for building multi-step forms (wizards) on top of React Hook Form and Zod.",
     "type": "module",
+    "license": "MIT",
+    "author": "Seth Davis",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sethdavis512/composed-form.git"
+    },
+    "homepage": "https://github.com/sethdavis512/composed-form#readme",
+    "keywords": [
+        "react",
+        "form",
+        "wizard",
+        "multi-step",
+        "stepper",
+        "react-hook-form",
+        "zod",
+        "validation"
+    ],
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -22,12 +40,25 @@
         "build": "tsdown",
         "dev": "tsdown --watch",
         "test": "bun test",
+        "prepublishOnly": "bun run build",
+        "release": "bun run build && changeset publish",
+        "version-packages": "changeset version",
+        "changeset": "changeset",
         "example": "bun run --cwd examples/basic dev"
     },
     "devDependencies": {
+        "@changesets/changelog-github": "^0.6.0",
+        "@changesets/cli": "^2.30.0",
+        "@happy-dom/global-registrator": "^20.8.9",
+        "@hookform/resolvers": "^3",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
         "@types/bun": "latest",
         "@types/react": "^19",
+        "happy-dom": "^20.8.9",
         "react": "^19",
+        "react-dom": "^19",
+        "react-hook-form": "^7",
         "tsdown": "^0.10.0",
         "typescript": "^5",
         "zod": "^3"
@@ -37,9 +68,5 @@
         "react": "^18 || ^19",
         "react-hook-form": "^7",
         "zod": "^3"
-    },
-    "dependencies": {
-        "@hookform/resolvers": "^3",
-        "react-hook-form": "^7"
     }
 }

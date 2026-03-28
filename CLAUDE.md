@@ -1,107 +1,44 @@
----
+## Project Overview
 
-Default to using Bun instead of Node.js.
+React library for building multi-step forms (wizards) on top of React Hook Form and Zod. Publishes ESM + CJS to npm with full type declarations.
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Bun automatically loads .env, so don't use dotenv.
+## Stack
 
-## APIs
+- **Runtime**: Bun
+- **Build**: tsdown (ESM + CJS + `.d.ts`)
+- **Test**: `bun test` with `@testing-library/react` and `happy-dom`
+- **Versioning/Publishing**: Changesets (`bun run changeset`, `bun run release`)
+- **CI**: GitHub Actions (`.github/workflows/release.yml`)
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+## Commands
+
+- `bun run build` -- build to `dist/`
+- `bun test` -- run all tests
+- `bun run dev` -- watch mode build
+- `bun run changeset` -- create a changeset for versioning
+- `bun run release` -- build + publish to npm
+- `bun run example` -- run the basic example
+
+## Architecture
+
+- `src/ComposedForm.tsx` -- root component, wraps React Hook Form's `FormProvider`
+- `src/Step.tsx` -- step component, registers with wizard via context
+- `src/hooks/useComposedFormContext.ts` -- enhanced RHF context with step-aware `register`
+- `src/hooks/useStep.ts` -- step metadata (position, count, isFirst/isLast)
+- `src/utils/resolver.ts` -- thin wrapper around `@hookform/resolvers/zod`
+- `src/utils/steps.ts` -- pure functions for step navigation logic
+- `examples/basic/` and `examples/advanced/` -- example apps (Bun.serve + HTML imports)
+
+## Dependencies
+
+- `dependencies`: none (all peer deps)
+- `peerDependencies`: `react`, `react-hook-form`, `@hookform/resolvers`, `zod`
+- `devDependencies`: testing libs, build tools, type packages
 
 ## Testing
 
-Use `bun test` to run tests.
+Tests live in `src/__tests__/`. Two test files:
+- `steps.test.ts` -- unit tests for step navigation utilities
+- `integration.test.tsx` -- component/hook integration tests with `@testing-library/react`
 
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
-```
-
-## Frontend
-
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
-
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
-```
-
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
-
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
-
-With the following `frontend.tsx`:
-
-```tsx#frontend.tsx
-import React from "react";
-
-// import .css files directly and it works
-import './index.css';
-
-import { createRoot } from "react-dom/client";
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
-```
-
-Then, run index.ts
-
-```sh
-bun --hot ./index.ts
-```
-
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+DOM environment is provided by `happy-dom` via `bunfig.toml` preload.

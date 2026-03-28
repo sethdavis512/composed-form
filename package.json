@@ -33,10 +33,7 @@
     "files": [
         "dist"
     ],
-    "workspaces": [
-        "examples/*"
-    ],
-    "scripts": {
+"scripts": {
         "build": "tsdown",
         "dev": "tsdown --watch",
         "test": "bun test",

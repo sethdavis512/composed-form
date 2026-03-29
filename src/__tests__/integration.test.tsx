@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { afterEach, describe, expect, test } from 'bun:test';
 import { render, screen, fireEvent, act, waitFor, cleanup } from '@testing-library/react';
 import { z } from 'zod';
@@ -6,7 +6,6 @@ import {
     ComposedForm,
     Step,
     useComposedFormContext,
-    useStep,
 } from '../index.ts';
 
 afterEach(cleanup);
@@ -16,14 +15,14 @@ afterEach(cleanup);
 // ---------------------------------------------------------------------------
 
 function NavBar() {
-    const { goToPreviousStep, submitStep, isFirstStep, isLastStep } =
+    const { back, next, isFirstStep, isLastStep } =
         useComposedFormContext();
     return (
         <div>
-            <button onClick={goToPreviousStep} disabled={isFirstStep}>
+            <button onClick={back} disabled={isFirstStep}>
                 Back
             </button>
-            <button onClick={() => void submitStep()}>
+            <button onClick={() => void next()}>
                 {isLastStep ? 'Submit' : 'Next'}
             </button>
         </div>
@@ -32,7 +31,7 @@ function NavBar() {
 
 function StepInfo() {
     const { currentStepName, stepCount, stepPosition, isFirstStep, isLastStep } =
-        useStep();
+        useComposedFormContext();
     return (
         <div data-testid="step-info">
             <span data-testid="step-name">{currentStepName}</span>
@@ -271,27 +270,16 @@ describe('Conditional steps', () => {
         return <input {...register('card')} data-testid="card-input" />;
     }
 
-    function PlanWatcher({ onChange }: { onChange: (v: string) => void }) {
-        const { watch } = useComposedFormContext();
-        useEffect(() => {
-            const sub = watch((values) => onChange(values.plan ?? 'free'));
-            return () => sub.unsubscribe();
-        }, [watch, onChange]);
-        return null;
-    }
-
     function ConditionalApp() {
-        const [plan, setPlan] = useState('free');
         return (
             <ComposedForm
                 schema={schema}
                 defaultValues={{ plan: 'free' }}
                 onSubmit={() => {}}
             >
-                <PlanWatcher onChange={setPlan} />
                 <StepInfo />
                 <Step name="plan"><PlanStep /></Step>
-                <Step name="card" enabled={plan === 'pro'}><CardStep /></Step>
+                <Step name="card" enabledWhen={(v) => v.plan === 'pro'}><CardStep /></Step>
                 <NavBar />
             </ComposedForm>
         );
@@ -404,10 +392,10 @@ describe('Cross-step validation', () => {
 });
 
 // ---------------------------------------------------------------------------
-// useStep hook
+// Step metadata (stepCount, stepPosition)
 // ---------------------------------------------------------------------------
 
-describe('useStep', () => {
+describe('step metadata', () => {
     const schema = z.object({
         a: z.string().optional(),
         b: z.string().optional(),
@@ -459,15 +447,6 @@ describe('useStep', () => {
         });
     });
 
-    test('throws when used outside ComposedForm', () => {
-        function BadComponent() {
-            useStep();
-            return null;
-        }
-        expect(() => render(<BadComponent />)).toThrow(
-            /useStep must be used inside/
-        );
-    });
 });
 
 // ---------------------------------------------------------------------------
@@ -487,10 +466,10 @@ describe('useComposedFormContext', () => {
 });
 
 // ---------------------------------------------------------------------------
-// goToStep (direct navigation)
+// goTo (direct navigation)
 // ---------------------------------------------------------------------------
 
-describe('goToStep', () => {
+describe('goTo', () => {
     const schema = z.object({
         a: z.string().optional(),
         b: z.string().optional(),
@@ -511,10 +490,10 @@ describe('goToStep', () => {
     }
 
     function JumpNav() {
-        const { goToStep } = useComposedFormContext();
+        const { goTo } = useComposedFormContext();
         return (
             <div>
-                <button onClick={() => goToStep('c')}>Jump to C</button>
+                <button onClick={() => goTo('c')}>Jump to C</button>
             </div>
         );
     }

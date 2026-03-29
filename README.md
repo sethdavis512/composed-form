@@ -48,12 +48,11 @@ function EmailStep() {
 }
 
 function Nav() {
-  const { goToPreviousStep, submitStep, isFirstStep, isLastStep } =
-    useComposedFormContext();
+  const { back, next, isFirstStep, isLastStep } = useComposedFormContext();
   return (
     <div>
-      <button onClick={goToPreviousStep} disabled={isFirstStep}>Back</button>
-      <button onClick={() => void submitStep()}>
+      <button onClick={back} disabled={isFirstStep}>Back</button>
+      <button onClick={() => void next()}>
         {isLastStep ? 'Submit' : 'Next'}
       </button>
     </div>
@@ -97,38 +96,23 @@ const schema = z
 
 ### Conditional steps
 
-Toggle entire steps on or off with the `enabled` prop. Disabled steps are skipped during navigation and their fields are excluded from step validation.
+Toggle entire steps on or off with `enabledWhen`. Pass a predicate that receives the current form values and returns whether the step should be active. Disabled steps are skipped during navigation and their fields are excluded from step validation.
 
 ```tsx
-function App() {
-  const [plan, setPlan] = useState('free');
-
-  return (
-    <ComposedForm schema={schema} onSubmit={handleSubmit}>
-      <Step name="plan"><PlanStep /></Step>
-      <Step name="billing" enabled={plan === 'pro'}>
-        <BillingStep />
-      </Step>
-      <Step name="review"><ReviewStep /></Step>
-    </ComposedForm>
-  );
-}
+<ComposedForm schema={schema} onSubmit={handleSubmit}>
+  <Step name="plan"><PlanStep /></Step>
+  <Step name="billing" enabledWhen={(v) => v.plan === 'pro'}>
+    <BillingStep />
+  </Step>
+  <Step name="review"><ReviewStep /></Step>
+</ComposedForm>
 ```
+
+The predicate re-evaluates whenever form values change, so the step toggles reactively without any watcher components or state management.
+
+For simple static cases, you can also use the `enabled` boolean prop directly. When both are provided, `enabledWhen` takes precedence.
 
 Steps are always mounted in the DOM (hidden via `display: none`) so React Hook Form field state is preserved. When a step is disabled, it simply gets skipped during navigation.
-
-To reactively watch a field value and toggle step visibility, use the watcher pattern:
-
-```tsx
-function PlanWatcher({ onChange }: { onChange: (plan: string) => void }) {
-  const { watch } = useComposedFormContext();
-  useEffect(() => {
-    const sub = watch((values) => onChange(values.plan ?? 'free'));
-    return () => sub.unsubscribe();
-  }, [watch, onChange]);
-  return null;
-}
-```
 
 ### Conditional fields within a step
 
@@ -154,10 +138,9 @@ function AddressStep() {
 
 `useComposedFormContext()` exposes these navigation methods:
 
-- `goToNextStep()` -- validates current step, then advances. Returns `Promise<boolean>`.
-- `goToPreviousStep()` -- goes back without validation.
-- `goToStep(name)` -- jumps to a specific step by name (no validation).
-- `submitStep()` -- validates current step; if it's the last enabled step, calls `onSubmit`. Otherwise advances. Returns `Promise<boolean>`.
+- `next()` -- validates current step, calls `onSubmitStep` if provided, then advances. On the last enabled step, calls `onSubmit` instead. Returns `Promise<boolean>`.
+- `back()` -- goes back without validation.
+- `goTo(name)` -- jumps to a specific step by name (no validation).
 
 ### Per-step submit callback
 
@@ -195,44 +178,38 @@ Defines a single step in the wizard.
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `name` | `string` | -- | Unique identifier for this step. |
-| `enabled` | `boolean` | `true` | When `false`, the step is skipped during navigation and its fields are excluded from step validation. |
+| `enabled` | `boolean` | `true` | When `false`, the step is skipped. Ignored when `enabledWhen` is provided. |
+| `enabledWhen` | `(values: FieldValues) => boolean` | -- | Reactive predicate controlling step visibility. Re-evaluated on every form value change. |
 
 ### `useComposedFormContext()`
 
 Returns everything from React Hook Form's `useFormContext()` plus wizard-specific actions. The `register` function is enhanced to automatically track fields in the enclosing `<Step>`.
 
-**Wizard actions:**
+**Navigation:**
 
 | Property | Type | Description |
 |---|---|---|
-| `goToNextStep` | `() => Promise<boolean>` | Validate current step, then advance. |
-| `goToPreviousStep` | `() => void` | Go back (no validation). |
-| `goToStep` | `(name: string) => void` | Jump to a step by name. |
-| `submitStep` | `() => Promise<boolean>` | Validate + submit (if last) or advance. |
+| `next` | `() => Promise<boolean>` | Validate current step, then advance or submit. |
+| `back` | `() => void` | Go back (no validation). |
+| `goTo` | `(name: string) => void` | Jump to a step by name. |
+
+**State:**
+
+| Property | Type | Description |
+|---|---|---|
 | `isFirstStep` | `boolean` | Whether the current step is first among enabled steps. |
 | `isLastStep` | `boolean` | Whether the current step is last among enabled steps. |
-| `currentStepName` | `string` | Name of the active step. |
-| `steps` | `StepRegistration[]` | All registered steps (including disabled). |
-
-### `useStep()`
-
-Returns metadata about the current step. Useful for progress indicators.
-
-| Property | Type | Description |
-|---|---|---|
 | `currentStepName` | `string` | Name of the active step. |
 | `currentStepIndex` | `number` | 0-based index in the full step list. |
 | `stepCount` | `number` | Count of enabled steps. |
 | `stepPosition` | `number` | 1-based position among enabled steps. |
-| `isFirstStep` | `boolean` | Whether it's the first enabled step. |
-| `isLastStep` | `boolean` | Whether it's the last enabled step. |
-| `steps` | `StepRegistration[]` | All registered steps. |
+| `steps` | `StepRegistration[]` | All registered steps (including disabled). |
 
 ### Re-exported from React Hook Form
 
 For convenience, these are re-exported so you don't need a separate `react-hook-form` import:
 
-`Controller`, `useController`, `useFieldArray`, `useFormContext`, `useFormState`, `useWatch`
+`Controller`, `useController`, `useFieldArray`, `useFormState`, `useWatch`
 
 ## Examples
 

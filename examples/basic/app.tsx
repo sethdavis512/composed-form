@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { z } from 'zod';
 import {
     ComposedForm,
     Step,
     useComposedFormContext,
-    useStep,
     useWatch
 } from 'composed-form';
 
@@ -50,7 +49,7 @@ const STEP_LABELS: Record<string, string> = {
 };
 
 function StepIndicator() {
-    const { steps, currentStepName } = useStep();
+    const { steps, currentStepName } = useComposedFormContext<FormValues>();
     const enabledSteps = steps.filter((s) => s.isEnabled);
     const currentIdx = enabledSteps.findIndex(
         (s) => s.name === currentStepName
@@ -82,7 +81,7 @@ function StepIndicator() {
 // ---------------------------------------------------------------------------
 
 function NavBar() {
-    const { goToPreviousStep, submitStep, isFirstStep, isLastStep } =
+    const { back, next, isFirstStep, isLastStep } =
         useComposedFormContext<FormValues>();
 
     return (
@@ -90,12 +89,12 @@ function NavBar() {
             <button
                 type="button"
                 className="secondary"
-                onClick={goToPreviousStep}
+                onClick={back}
                 disabled={isFirstStep}
             >
                 ← Back
             </button>
-            <button type="button" onClick={() => void submitStep()}>
+            <button type="button" onClick={() => void next()}>
                 {isLastStep ? 'Submit' : 'Next →'}
             </button>
         </div>
@@ -240,11 +239,11 @@ function BillingStep() {
 // ---------------------------------------------------------------------------
 // Step 5 — Review
 // Reads all current values via useWatch (reactive) and lets the user jump
-// back to any section via goToStep() before submitting.
+// back to any section via goTo() before submitting.
 // ---------------------------------------------------------------------------
 
 function ReviewStep() {
-    const { goToStep } = useComposedFormContext<FormValues>();
+    const { goTo } = useComposedFormContext<FormValues>();
     // useWatch with no args returns all current form values reactively.
     const values = useWatch<FormValues>() as FormValues;
 
@@ -262,7 +261,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('personal')}
+                        onClick={() => goTo('personal')}
                     >
                         Edit
                     </button>
@@ -281,7 +280,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('account')}
+                        onClick={() => goTo('account')}
                     >
                         Edit
                     </button>
@@ -302,7 +301,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('plan')}
+                        onClick={() => goTo('plan')}
                     >
                         Edit
                     </button>
@@ -328,27 +327,11 @@ function ReviewStep() {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: watches the plan field so the parent can toggle <Step enabled>
-// ---------------------------------------------------------------------------
-
-function PlanWatcher({ onChange }: { onChange: (plan: string) => void }) {
-    const { watch } = useComposedFormContext<FormValues>();
-
-    useEffect(() => {
-        const sub = watch((values) => onChange(values.plan ?? 'free'));
-        return () => sub.unsubscribe();
-    }, [watch, onChange]);
-
-    return null;
-}
-
-// ---------------------------------------------------------------------------
 // Root App
 // ---------------------------------------------------------------------------
 
 function App() {
     const [submitted, setSubmitted] = useState<FormValues | null>(null);
-    const [plan, setPlan] = useState<string>('free');
 
     if (submitted) {
         return (
@@ -376,7 +359,6 @@ function App() {
             defaultValues={{ plan: 'free' }}
             onSubmit={(data) => setSubmitted(data)}
         >
-            <PlanWatcher onChange={setPlan} />
             <StepIndicator />
 
             <Step name="personal">
@@ -392,7 +374,7 @@ function App() {
             </Step>
 
             {/* Disappears from navigation when plan !== "pro" */}
-            <Step name="billing" enabled={plan === 'pro'}>
+            <Step name="billing" enabledWhen={(v) => v.plan === 'pro'}>
                 <BillingStep />
             </Step>
 

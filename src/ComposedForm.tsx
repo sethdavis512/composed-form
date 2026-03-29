@@ -102,10 +102,13 @@ export function ComposedForm<
 
     const _updateStepEnabled = useCallback(
         (name: string, enabled: boolean) => {
-            stepsRef.current = stepsRef.current.map((s) =>
-                s.name === name ? { ...s, isEnabled: enabled } : s
-            );
-            bump();
+            const step = stepsRef.current.find((s) => s.name === name);
+            if (step && step.isEnabled !== enabled) {
+                stepsRef.current = stepsRef.current.map((s) =>
+                    s.name === name ? { ...s, isEnabled: enabled } : s
+                );
+                bump();
+            }
         },
         [bump]
     );
@@ -116,40 +119,12 @@ export function ComposedForm<
 
     const steps = stepsRef.current;
 
-    const goToNextStep = useCallback(async (): Promise<boolean> => {
-        const current = steps[currentStepIndex];
-        if (!current) return false;
-
-        const fieldNames = Array.from(current.fieldRegistry.current);
-        const valid =
-            fieldNames.length > 0
-                ? await form.trigger(fieldNames as FieldPath<TValues>[])
-                : true;
-
-        if (!valid) return false;
-
-        if (onSubmitStep) {
-            const allValues = form.getValues();
-            const stepValues = buildNestedPartial(
-                allValues as Record<string, unknown>,
-                fieldNames
-            ) as Partial<TValues>;
-            await onSubmitStep(current.name, stepValues);
-        }
-
-        const nextIndex = getNextEnabledIndex(steps, currentStepIndex);
-        if (nextIndex === -1) return false;
-
-        setCurrentStepIndex(nextIndex);
-        return true;
-    }, [steps, currentStepIndex, form, onSubmitStep]);
-
-    const goToPreviousStep = useCallback(() => {
+    const back = useCallback(() => {
         const prevIndex = getPrevEnabledIndex(steps, currentStepIndex);
         if (prevIndex !== -1) setCurrentStepIndex(prevIndex);
     }, [steps, currentStepIndex]);
 
-    const goToStep = useCallback(
+    const goTo = useCallback(
         (name: string) => {
             const idx = findStepIndexByName(steps, name);
             if (idx !== -1 && steps[idx]!.isEnabled) setCurrentStepIndex(idx);
@@ -157,7 +132,7 @@ export function ComposedForm<
         [steps]
     );
 
-    const submitStep = useCallback(async (): Promise<boolean> => {
+    const next = useCallback(async (): Promise<boolean> => {
         const lastEnabledIndex = getLastEnabledIndex(steps);
         const isLast = currentStepIndex === lastEnabledIndex;
 
@@ -216,6 +191,13 @@ export function ComposedForm<
     const isLastStep = currentStepIndex === lastEnabledIndex;
     const currentStepName = steps[currentStepIndex]?.name ?? '';
 
+    const enabledSteps = steps.filter((s) => s.isEnabled);
+    const stepCount = enabledSteps.length;
+    const stepPosition =
+        enabledSteps.findIndex(
+            (s) => s.name === steps[currentStepIndex]?.name
+        ) + 1;
+
     // -------------------------------------------------------------------------
     // Context value
     // -------------------------------------------------------------------------
@@ -224,10 +206,11 @@ export function ComposedForm<
         () => ({
             steps,
             currentStepIndex,
-            goToNextStep,
-            goToPreviousStep,
-            goToStep,
-            submitStep,
+            stepCount,
+            stepPosition,
+            next,
+            back,
+            goTo,
             isFirstStep,
             isLastStep,
             currentStepName,
@@ -239,10 +222,11 @@ export function ComposedForm<
         [
             steps,
             currentStepIndex,
-            goToNextStep,
-            goToPreviousStep,
-            goToStep,
-            submitStep,
+            stepCount,
+            stepPosition,
+            next,
+            back,
+            goTo,
             isFirstStep,
             isLastStep,
             currentStepName,

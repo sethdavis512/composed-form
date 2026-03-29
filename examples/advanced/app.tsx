@@ -4,22 +4,19 @@
  * Every library export is exercised here:
  *
  *  ComposedForm          -- schema, defaultValues, onSubmit, onSubmitStep (async)
- *  Step                  -- enabled (dynamic: 3 conditional steps)
- *  useComposedFormContext -- register, formState, submitStep, goToPreviousStep,
- *                           goToStep, isFirstStep, isLastStep, currentStepName,
+ *  Step                  -- enabledWhen (dynamic: 3 conditional steps)
+ *  useComposedFormContext -- register, formState, next, back, goTo, isFirstStep,
+ *                           isLastStep, currentStepName, stepCount, stepPosition,
  *                           form (raw RHF), watch, setValue
- *  useStep               -- stepCount, stepPosition, steps, currentStepName
  *  useFieldArray          -- schedule (Dates), speakers (Speakers), sponsors (Ticketing)
  *  Controller            -- event type cards, format cards, channel select
  *  useController         -- toggle switches for notify booleans
- *  useFormContext         -- CharCount sub-component (pure RHF, no wizard context)
  *  useFormState           -- isSubmitting (NavBar), dirtyFields (StepIndicator)
- *  useWatch              -- auto-derive slug, total schedule duration, review values,
- *                           conditional step watchers
+ *  useWatch              -- auto-derive slug, total schedule duration, review values
  *  SubmitHandler (type)  -- typed onSubmit callback
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { z } from 'zod';
 import {
@@ -29,9 +26,7 @@ import {
     useComposedFormContext,
     useController,
     useFieldArray,
-    useFormContext,
     useFormState,
-    useStep,
     useWatch
 } from 'composed-form';
 import type { SubmitHandler } from 'composed-form';
@@ -205,8 +200,7 @@ function toSlug(name: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// CharCount -- uses useFormContext (re-exported from RHF). Demonstrates that
-// a sub-component can access the form without needing the wizard context.
+// CharCount -- uses useComposedFormContext to access form values
 // ---------------------------------------------------------------------------
 
 function CharCount({
@@ -216,7 +210,7 @@ function CharCount({
     field: 'name' | 'description';
     max: number;
 }) {
-    const { watch } = useFormContext<FormValues>();
+    const { watch } = useComposedFormContext<FormValues>();
     const value = watch(field) ?? '';
     return (
         <span className={`char-count${value.length > max ? ' over' : ''}`}>
@@ -252,11 +246,11 @@ function ToggleSwitch({
 }
 
 // ---------------------------------------------------------------------------
-// StepIndicator -- uses useStep for wizard state + useFormState for dirtyFields
+// StepIndicator -- uses useComposedFormContext + useFormState for dirtyFields
 // ---------------------------------------------------------------------------
 
 function StepIndicator() {
-    const { steps, currentStepName } = useStep();
+    const { steps, currentStepName } = useComposedFormContext<FormValues>();
     const { dirtyFields } = useFormState<FormValues>();
     const enabledSteps = steps.filter((s) => s.isEnabled);
     const currentIdx = enabledSteps.findIndex(
@@ -298,7 +292,7 @@ function StepIndicator() {
 // ---------------------------------------------------------------------------
 
 function NavBar() {
-    const { goToPreviousStep, submitStep, isFirstStep, isLastStep } =
+    const { back, next, isFirstStep, isLastStep } =
         useComposedFormContext<FormValues>();
     const { isSubmitting } = useFormState<FormValues>();
 
@@ -307,14 +301,14 @@ function NavBar() {
             <button
                 type="button"
                 className="secondary"
-                onClick={goToPreviousStep}
+                onClick={back}
                 disabled={isFirstStep}
             >
                 Back
             </button>
             <button
                 type="button"
-                onClick={() => void submitStep()}
+                onClick={() => void next()}
                 disabled={isSubmitting}
             >
                 {isLastStep
@@ -888,7 +882,7 @@ function NotificationsStep() {
 // ---------------------------------------------------------------------------
 
 function ReviewStep() {
-    const { goToStep } = useComposedFormContext<FormValues>();
+    const { goTo } = useComposedFormContext<FormValues>();
     const values = useWatch<FormValues>() as FormValues;
 
     const hasSpeakers =
@@ -915,7 +909,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('basics')}
+                        onClick={() => goTo('basics')}
                     >
                         Edit
                     </button>
@@ -959,7 +953,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('schedule')}
+                        onClick={() => goTo('schedule')}
                     >
                         Edit
                     </button>
@@ -984,7 +978,7 @@ function ReviewStep() {
                         <button
                             type="button"
                             className="link"
-                            onClick={() => goToStep('speakers')}
+                            onClick={() => goTo('speakers')}
                         >
                             Edit
                         </button>
@@ -1006,7 +1000,7 @@ function ReviewStep() {
                         <button
                             type="button"
                             className="link"
-                            onClick={() => goToStep('venue')}
+                            onClick={() => goTo('venue')}
                         >
                             Edit
                         </button>
@@ -1034,7 +1028,7 @@ function ReviewStep() {
                         <button
                             type="button"
                             className="link"
-                            onClick={() => goToStep('ticketing')}
+                            onClick={() => goTo('ticketing')}
                         >
                             Edit
                         </button>
@@ -1069,7 +1063,7 @@ function ReviewStep() {
                     <button
                         type="button"
                         className="link"
-                        onClick={() => goToStep('notifications')}
+                        onClick={() => goTo('notifications')}
                     >
                         Edit
                     </button>
@@ -1098,33 +1092,6 @@ function ReviewStep() {
 }
 
 // ---------------------------------------------------------------------------
-// Watchers -- observe fields to toggle conditional steps
-// ---------------------------------------------------------------------------
-
-function ConditionalStepWatcher({
-    onTypeChange,
-    onFormatChange,
-    onPricingChange
-}: {
-    onTypeChange: (v: string) => void;
-    onFormatChange: (v: string) => void;
-    onPricingChange: (v: string) => void;
-}) {
-    const { watch } = useComposedFormContext<FormValues>();
-
-    useEffect(() => {
-        const sub = watch((values) => {
-            onTypeChange(values.type ?? '');
-            onFormatChange(values.format ?? '');
-            onPricingChange(values.pricing ?? '');
-        });
-        return () => sub.unsubscribe();
-    }, [watch, onTypeChange, onFormatChange, onPricingChange]);
-
-    return null;
-}
-
-// ---------------------------------------------------------------------------
 // Guide Sidebar -- shows conditional steps, active features, and tips
 // ---------------------------------------------------------------------------
 
@@ -1142,19 +1109,16 @@ const STEP_TIPS: Record<string, string> = {
     notifications:
         'Toggle switches use useController for custom boolean inputs. The channel selector uses Controller.',
     review:
-        'All form values are read reactively with useWatch. Click Edit links to jump to any step with goToStep().'
+        'All form values are read reactively with useWatch. Click Edit links to jump to any step with goTo().'
 };
 
-function GuideSidebar({
-    eventType,
-    format,
-    pricing
-}: {
-    eventType: string;
-    format: string;
-    pricing: string;
-}) {
-    const { currentStepName } = useStep();
+function GuideSidebar() {
+    const { currentStepName } = useComposedFormContext<FormValues>();
+    const values = useWatch<FormValues>() as FormValues;
+
+    const eventType = values.type ?? '';
+    const format = values.format ?? '';
+    const pricing = values.pricing ?? '';
 
     const showSpeakers =
         eventType === 'conference' || eventType === 'workshop';
@@ -1194,7 +1158,7 @@ function GuideSidebar({
             highlight: currentStepName === 'basics'
         },
         {
-            label: 'Character counters via useFormContext',
+            label: 'Character counters via useComposedFormContext',
             highlight: currentStepName === 'basics'
         },
         {
@@ -1280,17 +1244,6 @@ function GuideSidebar({
 
 function App() {
     const [submitted, setSubmitted] = useState<FormValues | null>(null);
-    const [eventType, setEventType] = useState('');
-    const [format, setFormat] = useState('');
-    const [pricing, setPricing] = useState('');
-
-    const handleTypeChange = useCallback((v: string) => setEventType(v), []);
-    const handleFormatChange = useCallback((v: string) => setFormat(v), []);
-    const handlePricingChange = useCallback((v: string) => setPricing(v), []);
-
-    const showSpeakers = eventType === 'conference' || eventType === 'workshop';
-    const showVenue = format === 'in-person' || format === 'hybrid';
-    const showTicketing = pricing === 'paid';
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         setSubmitted(data);
@@ -1323,11 +1276,6 @@ function App() {
                 console.log(`[onSubmitStep] ${stepName}:`, values);
             }}
         >
-            <ConditionalStepWatcher
-                onTypeChange={handleTypeChange}
-                onFormatChange={handleFormatChange}
-                onPricingChange={handlePricingChange}
-            />
             <div className="app-layout">
                 <div>
                     <StepIndicator />
@@ -1340,15 +1288,28 @@ function App() {
                         <ScheduleStep />
                     </Step>
 
-                    <Step name="speakers" enabled={showSpeakers}>
+                    <Step
+                        name="speakers"
+                        enabledWhen={(v) =>
+                            v.type === 'conference' || v.type === 'workshop'
+                        }
+                    >
                         <SpeakersStep />
                     </Step>
 
-                    <Step name="venue" enabled={showVenue}>
+                    <Step
+                        name="venue"
+                        enabledWhen={(v) =>
+                            v.format === 'in-person' || v.format === 'hybrid'
+                        }
+                    >
                         <VenueStep />
                     </Step>
 
-                    <Step name="ticketing" enabled={showTicketing}>
+                    <Step
+                        name="ticketing"
+                        enabledWhen={(v) => v.pricing === 'paid'}
+                    >
                         <TicketingStep />
                     </Step>
 
@@ -1363,11 +1324,7 @@ function App() {
                     <NavBar />
                 </div>
 
-                <GuideSidebar
-                    eventType={eventType}
-                    format={format}
-                    pricing={pricing}
-                />
+                <GuideSidebar />
             </div>
         </ComposedForm>
     );

@@ -4,8 +4,6 @@ export { Step } from './Step.tsx';
 
 // Hooks
 export { useComposedFormContext } from './hooks/useComposedFormContext.ts';
-export { useStep } from './hooks/useStep.ts';
-export type { UseStepReturn } from './hooks/useStep.ts';
 
 // Types
 export type {
@@ -22,7 +20,6 @@ export {
     Controller,
     useController,
     useFieldArray,
-    useFormContext,
     useFormState,
     useWatch
 } from 'react-hook-form';

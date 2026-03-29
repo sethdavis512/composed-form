@@ -52,13 +52,21 @@ export interface ComposedFormProps<
 // ---------------------------------------------------------------------------
 
 export interface StepProps {
-    /** Unique identifier for this step (used in navigation and `useStep`). */
+    /** Unique identifier for this step. */
     name: string;
     /**
      * When `false` this step is skipped entirely during navigation and its fields
      * are omitted from step validation. Defaults to `true`.
+     * Ignored when `enabledWhen` is provided.
      */
     enabled?: boolean;
+    /**
+     * Reactive predicate that controls whether this step is enabled.
+     * Re-evaluated whenever form values change. Takes precedence over `enabled`.
+     *
+     * Fields that haven't been filled yet will be `undefined` in the values object.
+     */
+    enabledWhen?: (values: FieldValues) => boolean;
     children: React.ReactNode;
 }
 
@@ -73,17 +81,19 @@ export interface ComposedFormContextValue<
     steps: StepRegistration[];
     /** Index of the currently active step within `steps`. */
     currentStepIndex: number;
-    /** Navigate to the next enabled step, validating the current step first. */
-    goToNextStep: () => Promise<boolean>;
-    /** Navigate to the previous enabled step (no validation). */
-    goToPreviousStep: () => void;
-    /** Navigate to a specific step by name (no validation). */
-    goToStep: (name: string) => void;
+    /** Count of enabled steps. */
+    stepCount: number;
+    /** 1-based position of the current step among enabled steps. */
+    stepPosition: number;
     /**
-     * Trigger validation for the current step's fields and — if valid — call
-     * `onSubmit` if this is the last step, or advance otherwise.
+     * Validate the current step, call `onSubmitStep` if provided, then advance.
+     * On the last enabled step, calls `onSubmit` instead of advancing.
      */
-    submitStep: () => Promise<boolean>;
+    next: () => Promise<boolean>;
+    /** Navigate to the previous enabled step (no validation). */
+    back: () => void;
+    /** Navigate to a specific step by name (no validation). */
+    goTo: (name: string) => void;
     /** Whether the current step is the first enabled step. */
     isFirstStep: boolean;
     /** Whether the current step is the last enabled step. */

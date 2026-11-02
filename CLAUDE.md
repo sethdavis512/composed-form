@@ -1,3 +1,7 @@
+## All green lights
+
+This is an all-green-lights project. Deploy: pushing to main redeploys the GitHub Pages docs and runs the Changesets release workflow. npm publishes only when the "Version Packages" PR merges; leave that PR to Seth.
+
 ## Project Overview
 
 React library for building multi-step forms (wizards) on top of React Hook Form and Zod. Publishes ESM + CJS to npm with full type declarations.

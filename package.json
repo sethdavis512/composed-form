@@ -1,6 +1,6 @@
 {
     "name": "composed-form",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "A React library for building multi-step forms (wizards) on top of React Hook Form and Zod.",
     "type": "module",
     "license": "MIT",
